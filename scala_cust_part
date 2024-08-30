@@ -1,0 +1,26 @@
+ val rawData = sc.textFile("/word",2)
+
+ //convert the lines into words using flatMap operation
+ val words = rawData.flatMap(line => line.split(" "))
+
+ //count the individual words using map and reduceByKey operation
+ val wordCount = words.map(word => (word, 1)).reduceByKey(_ + _)
+
+ val partitionedData=wordCount.partitionBy(new MyCustomerPartitioner(2))
+
+ //Save the result
+ partitionedData.saveAsTextFile("/output")
+
+
+
+class MyCustomerPartitioner(numParts: Int) extends Partitioner {
+ override def numPartitions: Int = numParts
+ 
+ override def getPartition(key: Any): Int = 
+ {
+    if( key.toString().equalsIgnoreCase("Welcome"))
+       return 0
+   else (key.toString().equalsIgnoreCase("Hello")&& key.toString().equalsIgnoreCase("Programmer"))
+      return 1
+ }
+}
